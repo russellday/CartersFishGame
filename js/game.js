@@ -82,7 +82,8 @@ var bgImage = new Image();
 bgImage.onload = function () {
 	bgReady = true;
 };
-bgImage.src = "images/ocean.png";
+//bgImage.src = "images/ocean.png";
+bgImage.src = "images/ocean2.jpg";
 
 // fish image
 var fishImage = new Image();
@@ -222,10 +223,16 @@ var render = function () {
 
 	  //its easy to get canvas to go full screen..
 		//need to figure out the background image
-		//ctx.canvas.width  = window.innerWidth;
-    //ctx.canvas.height = window.innerHeight;
+		ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
 
-		ctx.drawImage(bgImage, 0, 0);
+		//ctx.drawImage(bgImage, ctx.canvas.width, ctx.canvas.height);
+
+		var ptrn = ctx.createPattern(bgImage, 'repeat'); // Create a pattern with this image, and set it to "repeat".
+    ctx.fillStyle = ptrn;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
 		ctx.drawImage(fishImage, fish.x, fish.y);
 
 		// move each jellyfish down the canvas
