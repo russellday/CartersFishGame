@@ -96,6 +96,85 @@ var fish = {
 	speed: 256 // movement in pixels per second
 };
 
+
+// Handle touch events - begin
+
+var mouseIsDown = 0;
+var canvasX;
+var canvasY;
+
+function init() {
+	canvas.addEventListener("touchstart", touchDown, false);
+	canvas.addEventListener("touchmove", touchXY, true);
+	canvas.addEventListener("touchend", touchUp, false);
+	document.body.addEventListener("touchcancel", touchUp, false);
+}
+
+function touchDown() {
+	mouseIsDown = 1;
+	touchXY();
+}
+
+function touchUp() {
+	mouseIsDown = 0;
+	showPos();
+}
+
+function touchXY(e) {
+	e.preventDefault();
+	canvasX = e.targetTouches[0].pageX - canvas.offsetLeft;
+	canvasY = e.targetTouches[0].pageY - canvas.offsetTop;
+	showPos();
+}
+
+
+var TouchIsDown = false;
+var TouchDirection = "default";
+var LastX = 0;
+var LastY = 0;
+
+function showPos() {
+	ctx.font="50px Arial";
+	ctx.textAlign="center";
+	ctx.textBaseline="middle";
+	ctx.fillStyle="rgb(255,255,255)";
+	var str = canvasX + ", " + canvasY;
+	if (mouseIsDown) str = str + " down";
+	if (!mouseIsDown) str = str + " up";
+
+	if (mouseIsDown) {
+		TouchIsDown = true;
+		if(LastX > 0 && LastY > 0){
+			if(LastX > canvasX){
+				TouchDirection = "left";
+			}
+			if(LastX < canvasX){
+				TouchDirection = "right";
+			}
+			if(LastY > canvasY){
+				TouchDirection = "up";
+			}
+			if(LastY < canvasY){
+				TouchDirection = "down";
+			}
+		}
+	}
+	else {
+		TouchIsDown = false;
+	}
+
+	str = str + " - " + LastX + " " + LastY + " " + TouchDirection;
+	//for debug:
+	//ctx.clearRect(0,0, canvas.width,canvas.height);
+	//ctx.fillText(str, canvas.width /2, canvas.height / 2, canvas.width - 10);
+
+	LastX = canvasX;
+	LastY = canvasY;
+
+}
+
+// Handle touch events - end
+
 // Handle keyboard controls
 var keysDown = {};
 
@@ -128,6 +207,21 @@ var update = function (modifier) {
 		fish.x += fish.speed * modifier;
 	}
 
+	if(TouchIsDown){
+		if(TouchDirection === "left"){
+			fish.x -= fish.speed * modifier;
+		}
+		if(TouchDirection === "right"){
+			fish.x += fish.speed * modifier;
+		}
+		if(TouchDirection === "up"){
+			fish.y -= fish.speed * modifier;
+		}
+		if(TouchDirection === "down"){
+			fish.y += fish.speed * modifier;
+		}
+	}
+
 	jellies.forEach(function(entry) {
 		// Are they touching?
 		if (
@@ -148,15 +242,7 @@ var update = function (modifier) {
 
 	sharks.forEach(function(shark) {
 
-		//x = left and right
-		//y = up and down
-
-		// Are they touching?
-		//console.log("shark-x", shark.x );
-		//console.log("shark-y", shark.y );
-		//console.log("fish-x", fish.x );
-		//console.log("fish-y", fish.y );
-
+		//this could use some love... based on the shapes of the shark's its hard to get this accurate
 		if (
 			fish.x <= (shark.x + 300)
 			&& shark.x <= (fish.x + 300)
@@ -164,28 +250,25 @@ var update = function (modifier) {
 			&& shark.y <= (fish.y + 30) //up and down
 		)
 		{
+				//console.log("shark-x", shark.x );
+				//console.log("shark-y", shark.y );
+				//console.log("fish-x", fish.x );
+				//console.log("fish-y", fish.y );
 
-			console.log("shark-x", shark.x );
-			console.log("shark-y", shark.y );
-			console.log("fish-x", fish.x );
-			console.log("fish-y", fish.y );
+				//if(fish.x <= (shark.x + 30)){
+				//	console.log("fish.x <= shark.x + 30", "yes");
+				//}
+				//if(shark.x <= (fish.x + 30)){
+				//	console.log("shark.x <= fish.x + 30", "yes");
+				//}
+				//if(fish.y <= (shark.y + 30)){
+				//  console.log("fish.y <= shark.y + 30", "yes");
+				//}
+				//if(shark.y <= (fish.y + 30)){
+				//	console.log("shark.y <= fish.y + 30", "yes");
 
-			if(fish.x <= (shark.x + 30)){
-				console.log("fish.x <= shark.x + 30", "yes");
+				TotalHits = 1000; //sharks kill you..
 			}
-			if(shark.x <= (fish.x + 30)){
-				console.log("shark.x <= fish.x + 30", "yes");
-			}
-			if(fish.y <= (shark.y + 30)){
-			  console.log("fish.y <= shark.y + 30", "yes");
-			}
-			if(shark.y <= (fish.y + 30)){
-				console.log("shark.y <= fish.y + 30", "yes");
-			}
-
-
-			TotalHits = 1000;
-		}
 	});
 
 };
@@ -306,4 +389,5 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 // Let's play this game!
 var then = Date.now();
 reset();
+init();
 main();
