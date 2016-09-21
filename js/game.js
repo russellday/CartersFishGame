@@ -188,6 +188,8 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a monster
 var reset = function () {
+	//TotalHits = 0;
+	//ShowThings = true;
 	fish.x = canvas.width / 2;
 	fish.y = canvas.height / 2;
 };
@@ -300,7 +302,14 @@ function spawnShark() {
     sharks.push(shark_object);
 }
 
+function reboot() {
+	  //showsad();
+		setTimeout(function(){
+		         window.location.reload();
+		}, 4000);
+}
 
+var ShowThings = true;
 // Draw everything
 var render = function () {
 
@@ -309,37 +318,38 @@ var render = function () {
 		ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
 
-		//ctx.drawImage(bgImage, ctx.canvas.width, ctx.canvas.height);
+		if(ShowThings){
+			//ctx.drawImage(bgImage, ctx.canvas.width, ctx.canvas.height);
 
-		var ptrn = ctx.createPattern(bgImage, 'repeat'); // Create a pattern with this image, and set it to "repeat".
-    ctx.fillStyle = ptrn;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+			var ptrn = ctx.createPattern(bgImage, 'repeat'); // Create a pattern with this image, and set it to "repeat".
+	    ctx.fillStyle = ptrn;
+	    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+			ctx.drawImage(fishImage, fish.x, fish.y);
 
-		ctx.drawImage(fishImage, fish.x, fish.y);
+				// move each jellyfish down the canvas
+				for (var i = 0; i < jellies.length; i++) {
+						var j = jellies[i];
+						j.y += spawnRateOfDescent;
+						ctx.drawImage(j.image, j.x, j.y, 35, 35);
+				}
 
-		// move each jellyfish down the canvas
-    for (var i = 0; i < jellies.length; i++) {
-        var j = jellies[i];
-        j.y += spawnRateOfDescent;
-        ctx.drawImage(j.image, j.x, j.y, 35, 35);
-    }
-
-		//sharks
-		for (var i = 0; i < sharks.length; i++) {
-				var s = sharks[i];
-				s.x += shark_spawnRateAttack;
-				ctx.drawImage(s.image, s.x, s.y);
+				//sharks
+				for (var i = 0; i < sharks.length; i++) {
+						var s = sharks[i];
+						s.x += shark_spawnRateAttack;
+						ctx.drawImage(s.image, s.x, s.y);
+				}
 		}
-
 		// Score
 		if(TotalHits >= 5){
 			ctx.fillStyle = "rgb(250, 250, 250)";
 			ctx.font = "14px Helvetica";
 			ctx.textAlign = "left";
 			ctx.textBaseline = "top";
-			ctx.fillText("YOU LOST", 32, 32);
-			throw "Game Over";
+			ctx.fillText("GAME OVER", 32, 32);
+			ShowThings = false;
+			reboot();
 		}
 		else{
 			ctx.fillStyle = "rgb(250, 250, 250)";
@@ -379,7 +389,10 @@ var main = function () {
 	then = now;
 
 	// Request to do this again ASAP
-	requestAnimationFrame(main);
+	if(ShowThings)
+	{
+		requestAnimationFrame(main);
+	}
 };
 
 // Cross-browser support for requestAnimationFrame
